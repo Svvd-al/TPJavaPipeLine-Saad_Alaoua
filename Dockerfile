@@ -1,14 +1,11 @@
-# Utilisation d'une image Java légère
-FROM openjdk:17-jdk-slim
+# Utilisation d'une image JRE légère pour l'exécution
+FROM eclipse-temurin:17-jre-alpine
 
-# Définir le répertoire de travail
+# Création d'un répertoire de travail
 WORKDIR /app
 
-# Copier le fichier JAR (préparé par Jenkins) dans l'image
+# Copie du JAR (renommé par le pipeline)
 COPY app.jar app.jar
 
-# Exposer le port de l'application
-EXPOSE 8080
-
-# Commande de démarrage
+# Commande d'exécution
 ENTRYPOINT ["java", "-jar", "app.jar"]
