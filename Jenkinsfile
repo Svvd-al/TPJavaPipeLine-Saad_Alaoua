@@ -11,7 +11,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 deleteDir()
-                sh 'git clone https://github.com/Svvd-al/TPJavaPipeLine-Saad_Alaoua/edit/main/Jenkinsfile'
+                sh 'git clone https://github.com/Svvd-al/TPJavaPipeLine-Saad_Alaoua'
             }
         }
 
