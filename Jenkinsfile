@@ -2,59 +2,73 @@ pipeline {
     agent any
 
     tools {
-        // Assurez-vous que le nom 'maven' correspond exactement 
-        // au nom configuré dans "Manage Jenkins" -> "Global Tool Configuration"
-        maven 'maven' 
+        maven 'Maven3'   // adapte si ton Jenkins a un autre nom
+    }
+
+    environment {
+        IMAGE_NAME = "tp-java-pipeline"
+        IMAGE_TAG = "latest"
     }
 
     stages {
-        stage('Nettoyage & Diagnostic') {
+
+        stage('Checkout SCM') {
             steps {
-                echo 'Vérification de la structure des fichiers...'
-                // Cette commande affiche l'arborescence pour déboguer le chemin du pom.xml
-                sh 'ls -R' 
+                echo 'Récupération du code GitHub...'
+                checkout scm
             }
         }
 
-        stage('Récupération du code') {
+        stage('Structure du projet') {
             steps {
-                echo 'Clonage du dépôt depuis GitHub...'
-                checkout scm
+                echo 'Vérification de la structure...'
+                sh 'ls -R'
             }
         }
 
         stage('Compilation & Tests') {
             steps {
-                echo 'Exécution de Maven...'
-                script {
-                    /* Si votre pom.xml est dans un sous-dossier (ex: 'mavenprog'), 
-                       décommentez la ligne dir('mavenprog') ci-dessous.
-                       Sinon, laissez tel quel pour la racine.
-                    */
-                    // dir('mavenprog') {
-                        sh 'mvn clean package'
-                    // }
+                echo 'Build Maven...'
+
+                dir('Maven') {
+                    sh 'mvn clean package'
                 }
             }
         }
 
-        stage('Build Image Docker') {
+        stage('Build Docker Image') {
             steps {
-                script {
-                    echo "Préparation de l'image Docker..."
-                    // On suppose que le Dockerfile est à la racine du projet
-                    sh 'docker build -t tp-java-pipeline-saad .'
-                }
+                echo 'Construction de l’image Docker...'
+
+                sh """
+                docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                """
+            }
+        }
+
+        stage('Run Docker Container (test)') {
+            steps {
+                echo 'Lancement du container...'
+
+                sh """
+                docker run -d --name tp-java-app -p 8080:8080 ${IMAGE_NAME}:${IMAGE_TAG} || true
+                """
             }
         }
     }
 
     post {
         success {
-            echo 'Félicitations ! La Pipeline est terminée avec succès.'
+            echo 'Pipeline terminé avec SUCCÈS 🎉'
         }
+
         failure {
-            echo 'La Pipeline a échoué. Vérifiez les logs de la console (étape Diagnostic).'
+            echo 'Pipeline échoué ❌ Vérifie les logs'
+        }
+
+        always {
+            echo 'Nettoyage...'
+            sh 'docker rm -f tp-java-app || true'
         }
     }
 }
