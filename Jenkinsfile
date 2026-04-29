@@ -14,15 +14,13 @@ pipeline {
             }
         }
 
-       stage('Compilation & Tests') {
-            steps {
-                echo 'Exécution de Maven...'
-                
-                dir('mavenprog') {
-                    sh 'mvn clean package'
-                }
-            }
-        }
+      stage('Compilation & Tests') {
+    steps {
+        echo 'Exécution de Maven...'
+        // Remove the dir('mavenprog') block if pom.xml is at the root
+        sh 'mvn clean package' 
+    }
+}
 
         stage('Build Image Docker') {
             steps {
