@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven3'   // adapte si ton Jenkins a un autre nom
+        maven 'Maven3' 
     }
 
     environment {
@@ -11,7 +11,6 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout SCM') {
             steps {
                 echo 'Récupération du code GitHub...'
@@ -19,17 +18,9 @@ pipeline {
             }
         }
 
-        stage('Structure du projet') {
-            steps {
-                echo 'Vérification de la structure...'
-                sh 'ls -R'
-            }
-        }
-
         stage('Compilation & Tests') {
             steps {
                 echo 'Build Maven...'
-
                 dir('Maven') {
                     sh 'mvn clean package'
                 }
@@ -39,19 +30,23 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 echo 'Construction de l’image Docker...'
-
-                sh """
-                docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
-                """
+                script {
+                    // On copie le JAR généré vers la racine pour le Dockerfile
+                    sh 'cp Maven/target/Maven-1.0-SNAPSHOT.jar ./app.jar'
+                    
+                    // Construction de l'image
+                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                }
             }
         }
 
         stage('Run Docker Container (test)') {
             steps {
                 echo 'Lancement du container...'
-
+                // On supprime l'ancien s'il existe, puis on lance le nouveau
                 sh """
-                docker run -d --name tp-java-app -p 8080:8080 ${IMAGE_NAME}:${IMAGE_TAG} || true
+                docker rm -f tp-java-app || true
+                docker run -d --name tp-java-app -p 8080:8080 ${IMAGE_NAME}:${IMAGE_TAG}
                 """
             }
         }
@@ -61,14 +56,8 @@ pipeline {
         success {
             echo 'Pipeline terminé avec SUCCÈS 🎉'
         }
-
         failure {
-            echo 'Pipeline échoué ❌ Vérifie les logs'
-        }
-
-        always {
-            echo 'Nettoyage...'
-            sh 'docker rm -f tp-java-app || true'
+            echo 'Pipeline échoué ❌'
         }
     }
 }
