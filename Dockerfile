@@ -1,11 +1,11 @@
-# Utilisation d'une image JRE légère pour l'exécution
+# Utilisation d'une image Java légère
 FROM eclipse-temurin:17-jre-alpine
 
-# Création d'un répertoire de travail
+# Dossier de travail dans le conteneur
 WORKDIR /app
 
-# Copie du JAR (renommé par le pipeline)
+# On copie le fichier app.jar (créé par l'étape 'cp' du Jenkinsfile)
 COPY app.jar app.jar
 
-# Commande d'exécution
+# Lancement de l'application
 ENTRYPOINT ["java", "-jar", "app.jar"]
