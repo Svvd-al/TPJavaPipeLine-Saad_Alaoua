@@ -2,18 +2,15 @@ pipeline {
     agent any
 
     tools {
-        maven 'Maven3' 
-    }
-
-    environment {
-        IMAGE_NAME = "tp-java-pipeline"
-        IMAGE_TAG = "latest"
+        // Assurez-vous que "docker" est configuré dans 
+        // Administrer Jenkins -> Global Tool Configuration
+        maven 'Maven 3' 
     }
 
     stages {
         stage('Checkout SCM') {
             steps {
-                echo 'Récupération du code GitHub...'
+                echo 'Récupération du code...'
                 checkout scm
             }
         }
@@ -21,6 +18,7 @@ pipeline {
         stage('Compilation & Tests') {
             steps {
                 echo 'Build Maven...'
+                // On se déplace dans le dossier Maven pour compiler
                 dir('Maven') {
                     sh 'mvn clean package'
                 }
@@ -29,32 +27,30 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                echo 'Construction de l’image Docker...'
                 script {
-                    // On copie le JAR généré vers la racine pour le Dockerfile
-                    sh 'cp Maven/target/Maven-1.0-SNAPSHOT.jar ./app.jar'
+                    echo 'Construction de l’image Docker...'
+                    // Copie du JAR vers la racine pour le Dockerfile
+                    sh 'cp Maven/target/*.jar ./app.jar'
                     
                     // Construction de l'image
-                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                    sh 'docker build -t tp-java-pipeline:latest .'
                 }
             }
         }
 
         stage('Run Docker Container (test)') {
             steps {
-                echo 'Lancement du container...'
-                // On supprime l'ancien s'il existe, puis on lance le nouveau
-                sh """
-                docker rm -f tp-java-app || true
-                docker run -d --name tp-java-app -p 8080:8080 ${IMAGE_NAME}:${IMAGE_TAG}
-                """
+                echo 'Lancement du conteneur de test...'
+                // On supprime l'ancien conteneur s'il existe, puis on lance le nouveau
+                sh 'docker rm -f java-app-test || true'
+                sh 'docker run -d --name java-app-test tp-java-pipeline:latest'
             }
         }
     }
 
     post {
         success {
-            echo 'Pipeline terminé avec SUCCÈS 🎉'
+            echo 'Pipeline réussi ! ✅'
         }
         failure {
             echo 'Pipeline échoué ❌'
