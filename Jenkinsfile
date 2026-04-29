@@ -2,9 +2,8 @@ pipeline {
     agent any
 
     tools {
-        // Assurez-vous que "docker" est configuré dans 
-        // Administrer Jenkins -> Global Tool Configuration
-        maven 'Maven 3' 
+        // Doit correspondre exactement au nom dans ta capture d'écran
+        maven 'Maven3'
     }
 
     stages {
@@ -18,7 +17,6 @@ pipeline {
         stage('Compilation & Tests') {
             steps {
                 echo 'Build Maven...'
-                // On se déplace dans le dossier Maven pour compiler
                 dir('Maven') {
                     sh 'mvn clean package'
                 }
@@ -29,7 +27,7 @@ pipeline {
             steps {
                 script {
                     echo 'Construction de l’image Docker...'
-                    // Copie du JAR vers la racine pour le Dockerfile
+                    // On copie le JAR généré vers la racine (là où est le Dockerfile)
                     sh 'cp Maven/target/*.jar ./app.jar'
                     
                     // Construction de l'image
@@ -41,7 +39,7 @@ pipeline {
         stage('Run Docker Container (test)') {
             steps {
                 echo 'Lancement du conteneur de test...'
-                // On supprime l'ancien conteneur s'il existe, puis on lance le nouveau
+                // Nettoyage d'un ancien conteneur s'il existe
                 sh 'docker rm -f java-app-test || true'
                 sh 'docker run -d --name java-app-test tp-java-pipeline:latest'
             }
@@ -53,7 +51,7 @@ pipeline {
             echo 'Pipeline réussi ! ✅'
         }
         failure {
-            echo 'Pipeline échoué ❌'
+            echo 'Pipeline échoué ❌ - Vérifiez si Docker est bien installé sur le serveur Jenkins.'
         }
     }
 }
