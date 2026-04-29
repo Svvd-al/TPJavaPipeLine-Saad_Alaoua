@@ -1,57 +1,29 @@
 pipeline {
-    agent any
-
-    tools {
-        // Doit correspondre exactement au nom dans ta capture d'écran
-        maven 'Maven3'
+    agent {
+        docker {
+            image 'my-maven-git:latest'
+            args '-v $HOME/.m2:/root/.m2'
+        }
     }
 
     stages {
-        stage('Checkout SCM') {
+
+        stage('Checkout') {
             steps {
-                echo 'Récupération du code...'
-                checkout scm
+                deleteDir()
+                sh 'git clone https://github.com/Svvd-al/TPJavaPipeLine-Saad_Alaoua/edit/main/Jenkinsfile'
             }
         }
 
-        stage('Compilation & Tests') {
-            steps {
-                echo 'Build Maven...'
-                dir('Maven') {
-                    sh 'mvn clean package'
-                }
-            }
-        }
-
-        stage('Build Docker Image') {
+        stage('Build') {
             steps {
                 script {
-                    echo 'Construction de l’image Docker...'
-                    // On copie le JAR généré vers la racine (là où est le Dockerfile)
-                    sh 'cp Maven/target/*.jar ./app.jar'
-                    
-                    // Construction de l'image
-                    sh 'docker build -t tp-java-pipeline:latest .'
+                    dir('java-maven/maven') {
+                        sh 'mvn clean test package'
+                        sh 'java -jar target/maven-0.0.1-SNAPSHOT.jar'
+                    }
                 }
             }
-        }
-
-        stage('Run Docker Container (test)') {
-            steps {
-                echo 'Lancement du conteneur de test...'
-                // Nettoyage d'un ancien conteneur s'il existe
-                sh 'docker rm -f java-app-test || true'
-                sh 'docker run -d --name java-app-test tp-java-pipeline:latest'
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'Pipeline réussi ! ✅'
-        }
-        failure {
-            echo 'Pipeline échoué ❌ - Vérifiez si Docker est bien installé sur le serveur Jenkins.'
         }
     }
 }
