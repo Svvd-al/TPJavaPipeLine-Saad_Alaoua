@@ -1,31 +1,33 @@
 pipeline {
-    agent any
-
-    tools {
-        maven 'Maven3' // نفس الاسم لي حطيتي في Jenkins Tools
+    agent {
+        docker {
+            // Image contenant Maven et Git
+            image 'my-maven-git:latest'
+            // Pour réutiliser le cache Maven local entre builds
+            args '-v $HOME/.m2:/root/.m2'
+        }
     }
-
     stages {
-
         stage('Checkout') {
             steps {
-                deleteDir()
-                git 'https://github.com/simoks/java-maven.git'
+                // clean the directory
+                sh "rm -rf *"
+                // Checkout the Git repository
+                sh "git clone https://github.com/simoks/java-maven.git"
             }
         }
-
         stage('Build') {
             steps {
-                dir('java-maven/maven') {
-                    sh 'mvn clean test package'
-                }
-            }
-        }
-
-        stage('Run') {
-            steps {
-                dir('java-maven/maven') {
-                    sh 'java -jar target/maven-0.0.1-SNAPSHOT.jar'
+                // Here, we can can run Maven commands
+                script {
+                    def currentDir = pwd()
+                    echo "Current directory: ${currentDir}"
+                    // Navigate to the directory containing the Maven project
+                    dir('java-maven/maven') {
+                        // Run Maven commands
+                        sh 'mvn clean test package'
+                        sh "java -jar target/maven-0.0.1-SNAPSHOT.jar"
+                    }
                 }
             }
         }
