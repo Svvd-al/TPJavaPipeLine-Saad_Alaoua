@@ -5,17 +5,17 @@ pipeline {
         stage('Checkout') {
             steps {
                 cleanWs()
-                sh "git clone https://github.com/simoks/java-maven.git"
+                git url: 'https://github.com/simoks/java-maven.git', branch: 'main'
             }
         }
         stage('Build') {
             steps {
-                script {
-                    dir('java-maven/maven') {
-                        sh 'mvn clean test package'
-                        sh 'java -jar target/maven-0.0.1-SNAPSHOT.jar'
-                    }
-                }
+                sh '''
+                    cd java-maven/maven
+                    chmod +x mvnw
+                    ./mvnw clean test package
+                    java -jar target/maven-0.0.1-SNAPSHOT.jar
+                '''
             }
         }
     }
