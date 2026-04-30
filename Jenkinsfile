@@ -2,22 +2,19 @@ pipeline {
     agent any
     
     tools {
-        maven 'maven3'
+        maven 'Maven3'
     }
     
     stages {
         stage('Checkout') {
             steps {
                 cleanWs()
-                sh "git clone https://github.com/simoks/java-maven.git"
+                git url: 'https://github.com/simoks/java-maven.git', branch: 'main'
             }
         }
         stage('Build') {
             steps {
-                sh '''
-                    cd java-maven/maven
-                    mvn clean test package
-                '''
+                sh 'cd java-maven/maven && mvn clean test package'
             }
         }
     }
