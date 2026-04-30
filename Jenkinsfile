@@ -1,35 +1,60 @@
 pipeline {
     agent {
         docker {
-            // Image contenant Maven et Git
-            image 'my-maven-git:latest'
-            // Pour réutiliser le cache Maven local entre builds
-            args '-v $HOME/.m2:/root/.m2'
+            // Utilisez Dockerfile depuis le même dépôt ou l'image construite
+            // Option 1: Utiliser un Dockerfile depuis votre dépôt
+            dockerfile {
+                filename 'Dockerfile'
+                dir '.'
+                args '-v $HOME/.m2:/root/.m2'
+            }
+            
+            // Option 2: Si vous avez déjà construit l'image localement
+            // image 'my-maven-git:latest'
+            // args '-v $HOME/.m2:/root/.m2'
         }
     }
     stages {
         stage('Checkout') {
             steps {
-                // clean the directory
-                sh "rm -rf *"
-                // Checkout the Git repository
-                sh "git clone https://github.com/simoks/java-maven.git"
+                // Clean workspace (meilleur que rm -rf *)
+                cleanWs()
+                
+                // Checkout avec l'outil Git de Jenkins
+                checkout scm
             }
         }
         stage('Build') {
             steps {
-                // Here, we can can run Maven commands
                 script {
                     def currentDir = pwd()
                     echo "Current directory: ${currentDir}"
-                    // Navigate to the directory containing the Maven project
+                    
+                    // Le répertoire du projet
                     dir('java-maven/maven') {
-                        // Run Maven commands
+                        // Nettoyer, tester et empaqueter
                         sh 'mvn clean test package'
-                        sh "java -jar target/maven-0.0.1-SNAPSHOT.jar"
+                        
+                        // Optionnel: Tester l'exécution (peut bloquer le build)
+                        // sh 'java -jar target/maven-0.0.1-SNAPSHOT.jar &'
+                        
+                        // Archiver les artefacts
+                        archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
                     }
                 }
             }
+        }
+    }
+    post {
+        always {
+            // Nettoyer après le build
+            cleanWs()
+        }
+        success {
+            echo 'Pipeline réussi !'
+        }
+        failure {
+            echo 'Pipeline échoué !'
         }
     }
 }
