@@ -1,6 +1,6 @@
 # TPJavaPipeLine-Saad_Alaoua
 
-'Structure de gitHub :'
+Structure de gitHub :
 
 
 <img width="912" height="233" alt="image" src="https://github.com/user-attachments/assets/d47c4bde-5c04-4b4c-9e5e-2a0e1bc58fa0" />
@@ -30,3 +30,7 @@ Pipline Jenkens :
 <img width="1428" height="117" alt="image" src="https://github.com/user-attachments/assets/346c022c-5912-4301-999d-84e298662fdd" />
 
 
+Webhook :
+
+
+<img width="797" height="202" alt="image" src="https://github.com/user-attachments/assets/f1039cf2-83ac-4993-b3f8-59dc20f1414b" />
