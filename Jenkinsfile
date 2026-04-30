@@ -9,7 +9,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 cleanWs()
-                sh "git clone https://github.com/simoks/java-maven.git"
+                sh "https://github.com/Svvd-al/TPJavaPipeLine-Saad_Alaoua"
             }
         }
         stage('Build') {
