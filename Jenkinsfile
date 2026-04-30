@@ -9,12 +9,13 @@ pipeline {
         stage('Checkout') {
             steps {
                 cleanWs()
-                git url: 'https://github.com/simoks/java-maven.git', branch: 'main'
+                sh "git clone https://github.com/simoks/java-maven.git"
             }
         }
         stage('Build') {
             steps {
-                sh 'cd java-maven/maven && mvn clean test package'
+                sh "ls -la"
+                sh "cd java-maven/maven && mvn clean test package"
             }
         }
     }
