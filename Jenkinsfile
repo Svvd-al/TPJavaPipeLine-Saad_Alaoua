@@ -15,7 +15,7 @@ pipeline {
         stage('Build') {
             steps {
                 sh "ls -la"
-                sh "cd java-maven/maven && mvn clean test package"
+                sh "cd maven && mvn clean test package"
             }
         }
     }
