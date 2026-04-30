@@ -1,11 +1,4 @@
-# Utilisation d'une image Java légère
-FROM eclipse-temurin:17-jre-alpine
+FROM maven:3.9.6-eclipse-temurin-17
 
-# Dossier de travail dans le conteneur
-WORKDIR /app
-
-# On copie le fichier app.jar (créé par l'étape 'cp' du Jenkinsfile)
-COPY app.jar app.jar
-
-# Lancement de l'application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Installer git (souvent absent de l'image Maven de base)
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
