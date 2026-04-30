@@ -9,7 +9,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 cleanWs()
-                sh "https://github.com/Svvd-al/TPJavaPipeLine-Saad_Alaoua"
+                git url: 'https://github.com/simoks/java-maven.git', branch: 'main'
             }
         }
         stage('Build') {
