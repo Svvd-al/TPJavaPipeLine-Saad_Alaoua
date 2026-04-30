@@ -1,10 +1,8 @@
-FROM maven:3.9.6-eclipse-temurin-17
+# Dockerfile simple après compilation locale
+FROM eclipse-temurin:17-jre
 
-# Installer git (souvent absent de l'image Maven de base)
-RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+# Copier le JAR déjà compilé
+COPY mavenprog/target/*.jar app.jar
 
-# Définir le répertoire de travail
-WORKDIR /app
-
-# Optionnel : Définir des variables d'environnement
-ENV MAVEN_OPTS="-Dmaven.repo.local=/root/.m2"
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
